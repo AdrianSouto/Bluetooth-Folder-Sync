@@ -1,17 +1,8 @@
 import os
 import socket
 import threading
-import sys
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-
-# Configuración
-peer_addr = "34:E1:2D:5C:CA:B4"
-local_addr = "90:CC:DF:FE:8C:73"
-port = 30
-
-# Pedir al usuario que introduzca la dirección de la carpeta que desea sincronizar Ej ("D:/mi-ruta/folder")
-sync_folder = input("Introduce la dirección de la carpeta que deseas sincronizar (\"D:/mi-ruta/folder\"): ")
 
 class SyncHandler(FileSystemEventHandler):
     def __init__(self, peer_addr, port):
@@ -88,23 +79,24 @@ def sync_all_files(sync_folder, peer_addr, port):
             except OSError as e:
                 print(f"Error syncing file {file_path}: {e}")
 
-# Iniciar el servidor en un hilo separado
-server_thread = threading.Thread(target=start_server, args=(local_addr, port, sync_folder))
-server_thread.daemon = True
-server_thread.start()
+def start_sync(peer_addr, local_addr, port, sync_folder):
+    # Iniciar el servidor en un hilo separado
+    server_thread = threading.Thread(target=start_server, args=(local_addr, port, sync_folder))
+    server_thread.daemon = True
+    server_thread.start()
 
-# Sincronizar todos los archivos al iniciar
-sync_all_files(sync_folder, peer_addr, port)
+    # Sincronizar todos los archivos al iniciar
+    sync_all_files(sync_folder, peer_addr, port)
 
-# Configurar el observador para monitorear la carpeta de sincronización
-event_handler = SyncHandler(peer_addr, port)
-observer = Observer()
-observer.schedule(event_handler, sync_folder, recursive=True)
-observer.start()
+    # Configurar el observador para monitorear la carpeta de sincronización
+    event_handler = SyncHandler(peer_addr, port)
+    observer = Observer()
+    observer.schedule(event_handler, sync_folder, recursive=True)
+    observer.start()
 
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    observer.stop()
-observer.join()
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
