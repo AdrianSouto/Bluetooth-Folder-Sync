@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
-from main import start_sync
+from main import start_sync, stop_sync
 import threading
 
 sync_thread = None
@@ -23,6 +23,7 @@ def on_start():
         start_button.config(text="Stop Sync")
     else:
         # Detener el hilo
+        stop_sync()
         sync_thread = None
         start_button.config(text="Start Sync")
 
